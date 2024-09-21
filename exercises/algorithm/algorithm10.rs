@@ -2,8 +2,6 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
-
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 #[derive(Debug, Clone)]
@@ -28,8 +26,15 @@ impl Graph for UndirectedGraph {
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>> {
         &self.adjacency_table
     }
-    fn add_edge(&mut self, edge: (&str, &str, i32)) {
+}
+
+impl UndirectedGraph {
+
+    fn add_undirected_edge(&mut self, edge: (&str, &str, i32)) {
         //TODO
+        let (from, to, w) = edge;
+        self.add_edge(edge);
+        self.add_edge((to, from, w));
     }
 }
 pub trait Graph {
@@ -38,10 +43,23 @@ pub trait Graph {
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
         //TODO
-		true
+        let adjacency_table_mutable = self.adjacency_table_mutable();
+        if adjacency_table_mutable.contains_key(&node.to_string()) {
+            false
+        } else {
+            adjacency_table_mutable.insert(node.to_string(), vec![]);
+            true
+        }
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
         //TODO
+        let (from, to, weight) = edge;
+        self.add_node(from);
+        self.add_node(to);
+        let adjacency_table_mutable = self.adjacency_table_mutable();
+        let from_vec = adjacency_table_mutable.get_mut(from).unwrap();
+        from_vec.push((to.to_string(), weight));
+
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
@@ -59,6 +77,13 @@ pub trait Graph {
         edges
     }
 }
+
+fn main() {
+    let mut graph = UndirectedGraph::new();
+    graph.add_edge(("A", "B", 1));
+    graph.add_edge(("B", "C", 2));
+    println!("{:?}", graph.adjacency_table());
+}
 #[cfg(test)]
 mod test_undirected_graph {
     use super::Graph;
@@ -66,9 +91,9 @@ mod test_undirected_graph {
     #[test]
     fn test_add_edge() {
         let mut graph = UndirectedGraph::new();
-        graph.add_edge(("a", "b", 5));
-        graph.add_edge(("b", "c", 10));
-        graph.add_edge(("c", "a", 7));
+        graph.add_undirected_edge(("a", "b", 5));
+        graph.add_undirected_edge(("b", "c", 10));
+        graph.add_undirected_edge(("c", "a", 7));
         let expected_edges = [
             (&String::from("a"), &String::from("b"), 5),
             (&String::from("b"), &String::from("a"), 5),
@@ -77,6 +102,7 @@ mod test_undirected_graph {
             (&String::from("b"), &String::from("c"), 10),
             (&String::from("c"), &String::from("b"), 10),
         ];
+        println!("{:?}", graph.adjacency_table);
         for edge in expected_edges.iter() {
             assert_eq!(graph.edges().contains(edge), true);
         }

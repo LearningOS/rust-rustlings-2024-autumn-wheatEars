@@ -1,8 +1,7 @@
 /*
 	queue
-	This question requires you to use queues to implement the functionality of the stac
+	This question requires you to use queues to implement the functionality of the stack
 */
-// I AM NOT DONE
 
 #[derive(Debug)]
 pub struct Queue<T> {
@@ -52,9 +51,15 @@ impl<T> Default for Queue<T> {
     }
 }
 
+enum WhichQueue {
+    First,
+    Second,
+}
 pub struct myStack<T>
 {
 	//TODO
+    size: usize,
+    cur: WhichQueue,
 	q1:Queue<T>,
 	q2:Queue<T>
 }
@@ -62,20 +67,49 @@ impl<T> myStack<T> {
     pub fn new() -> Self {
         Self {
 			//TODO
+            size: 0usize,
+            cur: WhichQueue::First,
 			q1:Queue::<T>::new(),
 			q2:Queue::<T>::new()
         }
     }
     pub fn push(&mut self, elem: T) {
-        //TODO
+        match self.cur {
+            WhichQueue::First => {
+                self.q1.enqueue(elem);
+            }
+            WhichQueue::Second => {
+                self.q2.enqueue(elem);
+            }
+        }
+        self.size += 1;
+        
     }
     pub fn pop(&mut self) -> Result<T, &str> {
-        //TODO
-		Err("Stack is empty")
+        if self.size == 0 {
+            return Err("Stack is empty");
+        }
+        match self.cur {
+            WhichQueue::First => {
+                for _i in 1..self.size {
+                    self.q2.enqueue(self.q1.dequeue().unwrap());
+                }
+                self.size -= 1;
+                self.cur = WhichQueue::Second;
+                Ok(self.q1.dequeue().unwrap())
+            }
+            WhichQueue::Second => {
+                for _i in 1..self.size {
+                    self.q1.enqueue(self.q2.dequeue().unwrap());
+                }
+                self.size -= 1;
+                self.cur = WhichQueue::First;
+                Ok(self.q2.dequeue().unwrap())
+            }
+        }
     }
     pub fn is_empty(&self) -> bool {
-		//TODO
-        true
+		self.size == 0
     }
 }
 

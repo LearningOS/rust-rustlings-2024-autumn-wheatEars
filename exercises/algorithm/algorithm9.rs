@@ -2,8 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
-
 use std::cmp::Ord;
 use std::default::Default;
 
@@ -37,7 +35,15 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        let mut cur_idx = self.count + 1;
+        self.count += 1;
+        while self.parent_idx(cur_idx) > 0 && (self.comparator)(&self.items[cur_idx], &self.items[self.parent_idx(cur_idx)]) {
+            //swap
+            let parent_idx = self.parent_idx(cur_idx);
+            self.items.swap(cur_idx, parent_idx);
+            cur_idx = parent_idx;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +63,15 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left_idx = self.left_child_idx(idx);
+        let right_idx = self.right_child_idx(idx);
+        if right_idx > self.count {
+            left_idx
+        } else if (self.comparator)(&self.items[left_idx], &self.items[right_idx]) {
+            left_idx
+        } else {
+            right_idx
+        }
     }
 }
 
@@ -84,8 +97,29 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        let count = self.count;
+        if count == 0 {
+            None
+        } else {
+            self.items.swap(1, count);
+            self.count -= 1;
+            let mut cur_idx = 1;
+
+            println!("{}",self.count);
+            while self.children_present(cur_idx) {
+                let left_idx = self.left_child_idx(cur_idx);
+                let right_idx = self.right_child_idx(cur_idx);
+                let smallest_idx = self.smallest_child_idx(cur_idx);
+                if (self.comparator)(&self.items[smallest_idx], &self.items[cur_idx]) {
+                    self.items.swap(cur_idx, smallest_idx);
+                    cur_idx = smallest_idx;
+                } else {
+                    break;
+                }
+                
+            }
+            self.items.pop()
+        }
     }
 }
 
@@ -140,11 +174,14 @@ mod tests {
     #[test]
     fn test_max_heap() {
         let mut heap = MaxHeap::new();
+        println!("{:?}", heap.items);
         heap.add(4);
+        println!("{:?}", heap.items);
         heap.add(2);
         heap.add(9);
         heap.add(11);
         assert_eq!(heap.len(), 4);
+        println!("{:?}", heap.items);
         assert_eq!(heap.next(), Some(11));
         assert_eq!(heap.next(), Some(9));
         assert_eq!(heap.next(), Some(4));

@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -14,7 +13,7 @@ struct Node<T> {
     next: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+impl<T: PartialOrd + Clone> Node<T> {
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -29,13 +28,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: PartialOrd + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: PartialOrd + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -60,7 +59,7 @@ impl<T> LinkedList<T> {
         self.get_ith_node(self.start, index)
     }
 
-    fn get_ith_node(&mut self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
+    fn get_ith_node(&self, node: Option<NonNull<Node<T>>>, index: i32) -> Option<&T> {
         match node {
             None => None,
             Some(next_ptr) => match index {
@@ -71,33 +70,33 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-        let index_a = 0;
-        let index_b = 0;
+        let mut index_a = 0;
+        let mut index_b = 0;
 		//TODO
-		let new_linked_list = Self {
+		let mut new_linked_list = Self {
             length: 0,
             start: None,
             end: None,
         };
-        while index_a <= a.length && index_b <= b.length {
-            let opt_val_a = a.get_ith_node(index_a);
-            let opt_val_b = b.get_ith_node(index_b);
-            match (val_a, val_b) {
+        while index_a <= list_a.length && index_b <= list_b.length {
+            let opt_val_a = list_a.get_ith_node(list_a.start, index_a as i32).clone();
+            let opt_val_b = list_b.get_ith_node(list_b.start, index_b as i32).clone();
+            match (opt_val_a, opt_val_b) {
                 (Some(val_a), Some(val_b)) => {
-                    if a < b {
-                        new_linked_list.add(val_a);
+                    if *val_a < *val_b {
+                        new_linked_list.add(val_a.clone());
                         index_a += 1;
                     } else {
-                        new_linked_list.add(val_b);
+                        new_linked_list.add(val_b.clone());
                         index_b += 1;
                     }
                 },
                 (Some(val_a), None) => {
-                    new_linked_list.add(val_a);
+                    new_linked_list.add(val_a.clone());
                     index_a += 1;
                 },
-                (None, Some(val_a)) => {
-                    new_linked_list.add(val_b);
+                (None, Some(val_b)) => {
+                    new_linked_list.add(val_b.clone());
                     index_b += 1;
                 },
                 _ => break,
